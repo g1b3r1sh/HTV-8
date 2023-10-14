@@ -1,4 +1,7 @@
 import socket
+import threading
+import uuid
+
 import docker
 
 import requests
@@ -12,6 +15,19 @@ API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 
 current_docker_container_id = None
+
+
+def launch_docker_container(image_filename):
+    with open(f"dockers/{image_filename}", 'rb') as file:
+        client = docker.from_env()
+        image = client.images.load(file)[0]
+        container = client.containers.run(image.id, detach=True, auto_remove=True, ports={'5000/tcp': 8000})
+
+        if container is not None:
+            # Save container id to global variable
+            global current_docker_container_id
+            current_docker_container_id = container.id
+
 
 class RegistrationPage(BoxLayout):
     def go_to_login_page(self):
@@ -38,78 +54,71 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
-        """
-        global device_num
-
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
 
+        mac_address = uuid.getnode()
+        mac_address_hex = ':'.join(
+            ['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0, 8 * 6, 8)][::-1])
+
         print(ip_address)
+        print(mac_address_hex)
 
-        data = {'api_dev_key': API_KEY,
-                'api_option': 'paste',
-                'api_my_ip': ip_address,
-                'api_paste_format': 'python'}
+        # data = {'api_dev_key': API_KEY,
+        #         'api_my_mac': mac_address_hex,
+        #         'api_my_ip': ip_address,
+        #         'api_paste_format': 'python'}
+        #
+        # send_ip_request = requests.post(url=API_ENDPOINT, data=data)
+        #
+        # response = send_ip_request.json()
+        #
+        # if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
+        #     return
+        #
+        # app.device_num = response['device_num']
+        # docker_url = response['docker_url']
+        #
+        # get_docker_request = requests.get(docker_url, allow_redirects=True)
+        #
+        # if docker_url.find('/'):
+        #     filename = docker_url.rsplit('/', 1)[1]
+        # else:
+        #     filename = "docker_file.tar"
+        #
+        # file = open(f"dockers/{filename}", 'wb')
+        # file.write(get_docker_request.content)
+        # file.close()
 
-        send_ip_request = requests.post(url=API_ENDPOINT, data=data)
-
-        response = send_ip_request.json()
-
-        if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
-            return
-
-        device_num = response['device_num']
-        docker_url = response['docker_url']
-
-        get_docker_request = requests.get(docker_url, allow_redirects=True)
-
-        if docker_url.find('/'):
-            filename = docker_url.rsplit('/', 1)[1]
-        else:
-            filename = "docker_file"
-
-        file = open(f"dockers/{filename}", 'wb')
-        file.write(get_docker_request.content)
-        file.close()
-        """
         filename = "docker_file.tar"
 
-        docker_container = self.launch_docker_container(filename)
-
-        if docker_container is not None:
-            # Save container id to global variable
-            global current_docker_container_id
-            current_docker_container_id = docker_container.id
+        docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
+        docker_running_thread.start()
 
         # change page
         app.root.transition = FadeTransition()
         app.root.current = "stop_service"
 
-    def launch_docker_container(self, image_filename):
-        with open(f"dockers/{image_filename}", 'rb') as file:
-            client = docker.from_env()
-            image = client.images.load(file)[0]
-            container = client.containers.run(image.id, detach=True, auto_remove=True, ports={'5000/tcp': 8000})
-
-            return container
-
 
 class StopServicePage(BoxLayout):
     def stop_service(self):
-        # Switch to the registration screen
-        app.root.transition = FadeTransition()
-        app.root.current = 'start_service'
+        status = self.kill_docker_container(current_docker_container_id)
 
-        self.kill_docker_container(current_docker_container_id)
-
+        if status:
+            # Switch to the registration screen
+            app.root.transition = FadeTransition()
+            app.root.current = 'start_service'
 
     def kill_docker_container(self, container_id):
         # Stop docker process and cleanup docker files
         client = docker.from_env()
         if current_docker_container_id is not None:
             client.containers.get(container_id).kill()
+            return True
         # Note: Check if image had already existed before being added to docker to avoid removing pre-existing images
         # client.images.remove(current_docker_image_id)
+
+        return False
 
 
 class ServerApp(App):
