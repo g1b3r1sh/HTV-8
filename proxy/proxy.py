@@ -25,17 +25,12 @@ docker_image: any
 dashboard_md = Markdown("""
 # Dashboard
 
-<|{upload}|slider|min=10|max=1000000|>
-<|{download}|slider|min=10|max=1000000|>
-<|{max_ping}|slider|min=10|max=1000000|>
-<|{ram}|slider|min=10|max=1000000|>
-<|{ram_clock}|slider|min=1000|max=8000|>
-<|{threads}|slider|min=1|max=128|>
-<|{ram}|slider|min=10|max=1000000|>
-<|{cpu_clock}|slider|min=10|max=1000000|>
+<|{value}|number|label=Max Ping (ms)|>
+
+<|{upload}|slider|min=10|max=1000000|value=1000|>
 
 
-<|{docker_image}|file_selector|label=Docker Image|extensions=.dockerfile|>
+<|{docker_image}|file_selector|label=Upload Docker Image|extensions=*|>
 
 <|{value}|toggle|lov=Active; Inactive|>
 
