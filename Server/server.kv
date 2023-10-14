@@ -1,0 +1,189 @@
+<RegistrationPage>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1  # Background color (dark gray)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Button:
+            text: 'Login'
+            size_hint: None, None
+            size: 100, 50
+            font_size: 18
+            pos_hint: {'right': 1.0, 'top': 1.0}
+            on_release: root.go_to_login_page()
+
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 10
+            size_hint: None, None
+            size: 400, 450
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: 'Registration Page'
+                font_size: 36
+
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 5
+
+                TextInput:
+                    id: name_input
+                    hint_text: 'Name'
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+
+                TextInput:
+                    id: email_input
+                    hint_text: 'Email'
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+
+                TextInput:
+                    id: password_input
+                    hint_text: 'Password'
+                    password: True
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+
+                TextInput:
+                    id: comp_name_input
+                    hint_text: 'Company or Organization name'
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+                    on_text_validate: root.register_user(name_input.text, email_input.text, password_input.text, comp_name_input.text)
+
+            Button:
+                text: 'Register'
+                size_hint: None, None
+                size: 150, 60
+                font_size: 24
+                background_normal: ''
+                background_color: 0.2, 0.6, 0.2, 1
+                on_release: root.register_user(name_input.text, email_input.text, password_input.text, comp_name_input.text)
+
+
+<LoginPage>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1  # Background color (dark gray)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Button:
+            text: 'Register'
+            size_hint: None, None
+            size: 100, 50
+            font_size: 18
+            pos_hint: {'right': 1.0, 'top': 1.0}
+            on_release: root.go_to_registration_page()
+
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 10
+            size_hint: None, None
+            size: 400, 275
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: 'Login Page'
+                font_size: 36
+
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 5
+
+                TextInput:
+                    id: email_input
+                    hint_text: 'Email'
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+
+                TextInput:
+                    id: password_input
+                    hint_text: 'Password'
+                    password: True
+                    font_size: 18
+                    write_tab: False
+                    multiline: False
+                    on_text_validate: root.login_user(email_input.text, password_input.text)
+
+            Button:
+                text: 'Login'
+                size_hint: None, None
+                size: 150, 60
+                font_size: 24
+                background_normal: ''
+                background_color: 0.2, 0.6, 0.2, 1
+                on_release: root.login_user(email_input.text, password_input.text)
+
+
+<StartServicePage>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1  # Background color (dark gray)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Button:
+            text: 'Logout'
+            size_hint: None, None
+            size: 100, 50
+            font_size: 18
+            pos_hint: {'right': 1.0, 'top': 1.0}
+            on_release: root.logout()
+
+        FloatLayout:
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Image:
+                source: 'green_round_button.png'  # Replace with the actual path to your image
+                size_hint: 1, 1
+
+            Button:
+                text: 'Start Service'
+                size_hint: (0.4, 0.1)
+                font_size: 24
+                background_normal: ''
+                background_color: 0, 0, 0, 0
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                on_release: root.start_service()  # Replace with your logic to start the service
+
+<StopServicePage>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1  # Background color (dark gray)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        FloatLayout:
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Image:
+                source: 'red_round_button.png'  # Replace with the actual path to your image
+                size_hint: 1, 1
+
+            Button:
+                text: 'Stop Service'
+                size_hint: (0.4, 0.1)
+                font_size: 24
+                background_normal: ''
+                background_color: 0, 0, 0, 0
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                on_release: root.stop_service()  # Replace with your logic to start the service
