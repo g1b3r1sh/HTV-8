@@ -1,11 +1,14 @@
+import socket
+
+import requests
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.boxlayout import BoxLayout
 
-API_ENDPOINT = "http://pastebin.com/api/api_post.php" # todo: change this
+API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
 
 # your API key here
-API_KEY = "XXXXXXXXXXXXXXXXX" # todo: change this
+API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 
 
 class RegistrationPage(BoxLayout):
@@ -23,7 +26,6 @@ class LoginPage(BoxLayout):
         app.root.current = 'registration'
 
     def login_user(self, email, password):
-        print(email, password)
         if email == "htk@htk.com" and password == "test1234":
             app.root.current = "start_service"
 
@@ -34,12 +36,40 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
+        global device_num
+
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+
+        print(ip_address)
+
         data = {'api_dev_key': API_KEY,
                 'api_option': 'paste',
-                'api_my_ip': '127.0.0.1', # todo: change this
+                'api_my_ip': ip_address,
                 'api_paste_format': 'python'}
 
+        send_ip_request = requests.post(url=API_ENDPOINT, data=data)
 
+        response = send_ip_request.json()
+
+        if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
+            return
+
+        device_num = response['device_num']
+        docker_url = response['docker_url']
+
+        get_docker_request = requests.get(docker_url, allow_redirects=True)
+
+        if docker_url.find('/'):
+            filename = docker_url.rsplit('/', 1)[1]
+        else:
+            filename = "docker_file"
+
+        file = open(f"dockers/{filename}", 'wb')
+        file.write(get_docker_request.content)
+        file.close()
+
+        # Running the docker
 
         # change page
         app.root.transition = FadeTransition()
@@ -54,6 +84,8 @@ class StopServicePage(BoxLayout):
 
 
 class ServerApp(App):
+    device_num = "Device number 1"
+
     def build(self):
         sm = ScreenManager()
 
