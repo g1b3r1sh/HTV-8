@@ -1,4 +1,5 @@
 import socket
+import docker
 
 import requests
 from kivy.app import App
@@ -10,6 +11,8 @@ API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
 # your API key here
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 
+current_docker_image_id = None
+current_docker_container_id = None
 
 class RegistrationPage(BoxLayout):
     def go_to_login_page(self):
@@ -70,6 +73,14 @@ class StartServicePage(BoxLayout):
         file.close()
 
         # Running the docker
+        with open(f"dockers/{filename}", 'rb') as file:
+            client = docker.from_env()
+            image = client.images.load(file)
+            container = client.containers.run(image.id, detach=True, auto_remove=True, ports={'5000/tcp': 8000})
+
+            # Save docker ids to global variables
+            current_docker_image_id = image.id
+            current_docker_container_id = container.id
 
         # change page
         app.root.transition = FadeTransition()
@@ -81,6 +92,11 @@ class StopServicePage(BoxLayout):
         # Switch to the registration screen
         app.root.transition = FadeTransition()
         app.root.current = 'start_service'
+
+        # Stop docker process and cleanup docker files
+        client = docker.from_env()
+        client.containers.get(current_docker_container_id).kill()
+        client.images.remove(current_docker_image_id)
 
 
 class ServerApp(App):
