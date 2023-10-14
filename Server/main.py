@@ -11,7 +11,6 @@ API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
 # your API key here
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 
-current_docker_image_id = None
 current_docker_container_id = None
 
 class RegistrationPage(BoxLayout):
@@ -39,6 +38,7 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
+        """
         global device_num
 
         hostname = socket.gethostname()
@@ -71,20 +71,27 @@ class StartServicePage(BoxLayout):
         file = open(f"dockers/{filename}", 'wb')
         file.write(get_docker_request.content)
         file.close()
+        """
+        filename = "docker_file.tar"
 
-        # Running the docker
-        with open(f"dockers/{filename}", 'rb') as file:
-            client = docker.from_env()
-            image = client.images.load(file)
-            container = client.containers.run(image.id, detach=True, auto_remove=True, ports={'5000/tcp': 8000})
+        docker_container = self.launch_docker_container(filename)
 
-            # Save docker ids to global variables
-            current_docker_image_id = image.id
-            current_docker_container_id = container.id
+        if docker_container is not None:
+            # Save container id to global variable
+            global current_docker_container_id
+            current_docker_container_id = docker_container.id
 
         # change page
         app.root.transition = FadeTransition()
         app.root.current = "stop_service"
+
+    def launch_docker_container(self, image_filename):
+        with open(f"dockers/{image_filename}", 'rb') as file:
+            client = docker.from_env()
+            image = client.images.load(file)[0]
+            container = client.containers.run(image.id, detach=True, auto_remove=True, ports={'5000/tcp': 8000})
+
+            return container
 
 
 class StopServicePage(BoxLayout):
@@ -93,10 +100,16 @@ class StopServicePage(BoxLayout):
         app.root.transition = FadeTransition()
         app.root.current = 'start_service'
 
+        self.kill_docker_container(current_docker_container_id)
+
+
+    def kill_docker_container(self, container_id):
         # Stop docker process and cleanup docker files
         client = docker.from_env()
-        client.containers.get(current_docker_container_id).kill()
-        client.images.remove(current_docker_image_id)
+        if current_docker_container_id is not None:
+            client.containers.get(container_id).kill()
+        # Note: Check if image had already existed before being added to docker to avoid removing pre-existing images
+        # client.images.remove(current_docker_image_id)
 
 
 class ServerApp(App):
