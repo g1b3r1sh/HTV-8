@@ -153,5 +153,5 @@ def get_lan_ip() -> str:
     iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
     return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
-Gui(pages=pages).run(port=8080, host=get_lan_ip())
+Gui(pages=pages).run(port=8080, host=get_lan_ip(), title='DeCloud')
 
