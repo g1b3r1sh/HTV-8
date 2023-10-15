@@ -3,7 +3,6 @@ from taipy.gui import Markdown
 from taipy.gui import navigate
 import requests
 import netifaces
-import os
 
 
 gui = Gui
