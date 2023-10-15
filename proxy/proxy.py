@@ -28,7 +28,7 @@ sign_in_md = Markdown("""
 
 <|{email}|input|label=Email|>
 
-<|{password}|input|label=Password|password=True|on_action=log_in|>
+<|{password}|input|label=Password|password=True|>
 
 <|Log In|button|on_action=log_in|>
 
