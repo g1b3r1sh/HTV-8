@@ -1,4 +1,5 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, url_for
+from ping3 import ping
 
 
 all_servers = []
@@ -10,13 +11,22 @@ server_app = Flask(__name__)
 def receive_data():
     data = request.get_json()
     servers.append(data['ip'])
-    print(servers)
     return 'Success!', 200
 
 @server_app.route('/DeServer')
 def redirect_user():
-    if len(servers) > 0:
-        return redirect(servers[0])
-    return 'No servers available (temporarily)'s
+    if ready_server != None:
+        return redirect(ready_server)
+    # Loop them until a valid server appears if no server appeared initially, this is only nessecary for the demo
+    # as redundancy is less resiliant
+    return redirect(url_for('DeServer'))
+
+def ping_server(server: str):
+    time = ping(server)
+    all_servers.remove(server)
+    if time != None:
+        all_servers.insert(server, 0)
+        ready_server = server
+        ping_server(server)
 
 server_app.run(debug=True, port=8000)
