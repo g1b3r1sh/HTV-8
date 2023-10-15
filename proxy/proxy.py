@@ -33,7 +33,6 @@ sign_in_md = Markdown("""
 
 """)
 
-
 def generate_ram_size_strings():
     ram_sizes = []
     for i in range(128, 1000, 128):
@@ -43,30 +42,74 @@ def generate_ram_size_strings():
     return ram_sizes
 ram_sizes = generate_ram_size_strings()
 
+# price = {0.1, ping <= 10; 0.10 - 0.01 * (ping / 10 - 1), 10 < ping <= 100; 0.01 - 0.0001 * (ping / 10 - 1), 100 < ping <= 500; 0.005, ping > 500}
+def calculate_max_ping_price(max_ping):
+    if max_ping <= 10:
+        return 0.1
+    if max_ping <= 100:
+        return 0.1 - 0.01 * (max_ping // 10 - 1)
+    if max_ping <= 500:
+        return 0.01 - 0.0001 * (max_ping // 10 - 1)
+    return 0.005
+
+# price = 0.00001 * threads
+def calculate_num_threads_price(num_threads):
+    return 0.00001 * num_threads
+
+# price = 0.005 / GB
+def calculate_ram_price(ram):
+    if ram[-2] == 'M':
+        return int(ram.split()[0]) * 0.001 * 0.005
+    elif ram[-2] == 'G':
+        return int(ram.split()[0]) * 0.005
+
 max_ping = 100
+max_ping_price = calculate_max_ping_price(max_ping)
 num_threads = 1
+num_threads_price = calculate_num_threads_price(num_threads)
 ram = "128 MB"
+ram_price = calculate_ram_price(ram)
+total_price = max_ping_price + num_threads_price + ram_price
+
+def update_prices(state):
+    state.max_ping_price = calculate_max_ping_price(state.max_ping)
+    state.num_threads_price = calculate_num_threads_price(state.num_threads)
+    state.ram_price = calculate_ram_price(state.ram)
+    state.total_price = state.max_ping_price + state.num_threads_price + state.ram_price
+
 docker_image = None
 
 dashboard_md = Markdown("""
 # Order Server
 
-<|{max_ping}|number|label=Max Ping (ms)|>
-
+<|{max_ping}|number|label=Max Ping (ms)|propagate|on_change=update_prices|>
 
 Threads:
 
-<|{num_threads}|slider|min=1|max=128|>
+<|{num_threads}|slider|min=1|max=128|on_change=update_prices|>
 
 RAM:
 
-<|{ram}|slider|lov={ram_sizes}|text_anchor=none|>
+<|{ram}|slider|lov={ram_sizes}|text_anchor=none|continuous|on_change=update_prices|>
 
 
 <|{docker_image}|file_selector|label=Upload Docker Image|extensions=.tar|on_action=on_upload|>
 
+### Checkout
+<|card|
+Max Ping: $<|{max_ping_price}|text|format=%.5f|>/hr
+
+Threads: $<|{num_threads_price}|text|format=%.5f|>/hr
+
+RAM: $<|{ram_price}|text|format=%.5f|>/hr
+
+
+
+##### **Total: $<|{total_price}|text|format=%.5f|>/hr**
 
 <|Order|button|on_action=on_order_server|>
+
+|>
 
 """)
 
@@ -78,6 +121,7 @@ order_complete_md = Markdown("""
 * Max Ping: <|{max_ping}|> ms
 * Threads: <|{num_threads}|> thread(s)
 * RAM: <|{ram}|>
+* Price: $<|{total_price}|text|format=%.5f|>/hr
 """)
 
 
