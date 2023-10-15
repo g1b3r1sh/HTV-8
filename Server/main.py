@@ -89,24 +89,24 @@ class StartServicePage(BoxLayout):
         if not (send_ip_request.status_code == 200):
             return
 
-        # app.device_num = response['device_num']
-        # docker_url = response['docker_url']
+        app.device_num = response['device_num']
+        docker_url = response['docker_url']
 
-        # get_docker_request = requests.get(docker_url, allow_redirects=True)
+        get_docker_request = requests.get(docker_url, allow_redirects=True)
 
-        # if docker_url.find('/'):
-        #     filename = docker_url.rsplit('/', 1)[1]
-        # else:
-        #     filename = "docker_file.tar"
+        if docker_url.find('/'):
+            filename = docker_url.rsplit('/', 1)[1]
+        else:
+            filename = "docker_file.tar"
 
-        # file = open(f"dockers/{filename}", 'wb')
-        # file.write(get_docker_request.content)
-        # file.close()
+        file = open(f"dockers/{filename}", 'wb')
+        file.write(get_docker_request.content)
+        file.close()
 
-        # filename = "docker_file.tar"
-        #
-        # docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
-        # docker_running_thread.start()
+        filename = "docker_file.tar"
+        
+        docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
+        docker_running_thread.start()
 
         # change page
         app.root.transition = FadeTransition()
@@ -115,8 +115,9 @@ class StartServicePage(BoxLayout):
 
 class StopServicePage(BoxLayout):
     def stop_service(self):
-        status = self.kill_docker_container(current_docker_container_id)
+        # status = self.kill_docker_container(current_docker_container_id)
 
+        status = True
         if status:
             # Switch to the registration screen
             app.root.transition = FadeTransition()
