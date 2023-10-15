@@ -9,7 +9,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.boxlayout import BoxLayout
 
-API_ENDPOINT = "http://192.168.15.114:8080/"
+API_ENDPOINT = "http://192.168.15.195:8000/"
 
 # your API key here
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
@@ -54,7 +54,7 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
-        hostname = socket.gethostname()
+        hostname = socket.getfqdn()
         ip_address = socket.gethostbyname(hostname)
 
         mac_address = uuid.getnode()
@@ -68,26 +68,27 @@ class StartServicePage(BoxLayout):
                 'my_mac': mac_address_hex,
                 'ip': ip_address}
 
-        send_ip_request = requests.post(url=API_ENDPOINT, data=data)
+        send_ip_request = requests.post(url=API_ENDPOINT + 'api/server_init', json=data, headers={
+            'Content-Type':'application/json'})
 
-        response = send_ip_request.json()
+        # response = send_ip_request.text
 
-        if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
+        if not (send_ip_request.status_code == 200):
             return
 
-        app.device_num = response['device_num']
-        docker_url = response['docker_url']
+        # app.device_num = response['device_num']
+        # docker_url = response['docker_url']
 
-        get_docker_request = requests.get(docker_url, allow_redirects=True)
+        # get_docker_request = requests.get(docker_url, allow_redirects=True)
 
-        if docker_url.find('/'):
-            filename = docker_url.rsplit('/', 1)[1]
-        else:
-            filename = "docker_file.tar"
+        # if docker_url.find('/'):
+        #     filename = docker_url.rsplit('/', 1)[1]
+        # else:
+        #     filename = "docker_file.tar"
 
-        file = open(f"dockers/{filename}", 'wb')
-        file.write(get_docker_request.content)
-        file.close()
+        # file = open(f"dockers/{filename}", 'wb')
+        # file.write(get_docker_request.content)
+        # file.close()
 
         # filename = "docker_file.tar"
         #
@@ -141,10 +142,11 @@ class ServerApp(App):
         stop_service_screen.add_widget(StopServicePage())
 
         # Adding pages to the screen manager
+        sm.add_widget(start_service_screen)
         sm.add_widget(registration_screen)
         sm.add_widget(login_screen)
         sm.add_widget(stop_service_screen)
-        sm.add_widget(start_service_screen)
+        # sm.add_widget(start_service_screen)
         return sm
 
 
