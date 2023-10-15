@@ -9,7 +9,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.boxlayout import BoxLayout
 
-API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
+API_ENDPOINT = "http://192.168.15.114:8080/"
 
 # your API key here
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
@@ -64,36 +64,35 @@ class StartServicePage(BoxLayout):
         print(ip_address)
         print(mac_address_hex)
 
-        # data = {'api_dev_key': API_KEY,
-        #         'api_my_mac': mac_address_hex,
-        #         'api_my_ip': ip_address,
-        #         'api_paste_format': 'python'}
-        #
-        # send_ip_request = requests.post(url=API_ENDPOINT, data=data)
-        #
-        # response = send_ip_request.json()
-        #
-        # if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
-        #     return
-        #
-        # app.device_num = response['device_num']
-        # docker_url = response['docker_url']
-        #
-        # get_docker_request = requests.get(docker_url, allow_redirects=True)
-        #
-        # if docker_url.find('/'):
-        #     filename = docker_url.rsplit('/', 1)[1]
-        # else:
-        #     filename = "docker_file.tar"
-        #
-        # file = open(f"dockers/{filename}", 'wb')
-        # file.write(get_docker_request.content)
-        # file.close()
+        data = {'dev_key': API_KEY,
+                'my_mac': mac_address_hex,
+                'ip': ip_address}
 
-        filename = "docker_file.tar"
+        send_ip_request = requests.post(url=API_ENDPOINT, data=data)
 
-        docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
-        docker_running_thread.start()
+        response = send_ip_request.json()
+
+        if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
+            return
+
+        app.device_num = response['device_num']
+        docker_url = response['docker_url']
+
+        get_docker_request = requests.get(docker_url, allow_redirects=True)
+
+        if docker_url.find('/'):
+            filename = docker_url.rsplit('/', 1)[1]
+        else:
+            filename = "docker_file.tar"
+
+        file = open(f"dockers/{filename}", 'wb')
+        file.write(get_docker_request.content)
+        file.close()
+
+        # filename = "docker_file.tar"
+        #
+        # docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
+        # docker_running_thread.start()
 
         # change page
         app.root.transition = FadeTransition()
@@ -108,6 +107,10 @@ class StopServicePage(BoxLayout):
             # Switch to the registration screen
             app.root.transition = FadeTransition()
             app.root.current = 'start_service'
+
+    def update_label(self, dt):
+        self.amount += 0.01
+        self.ids.dynamic_label.text = f'${self.amount:.2f}'
 
     def kill_docker_container(self, container_id):
         # Stop docker process and cleanup docker files

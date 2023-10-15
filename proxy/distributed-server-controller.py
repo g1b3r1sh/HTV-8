@@ -10,7 +10,7 @@ server_app = Flask(__name__)
 @server_app.route('/api/server_init', methods=['POST'])
 def receive_data():
     data = request.get_json()
-    servers.append(data['ip'])
+    all_servers.append(data['ip'])
     ping_server(data)
     return 'Success!', 200
 
