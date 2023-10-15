@@ -49,7 +49,7 @@ pages = {
 
 def log_in(state):
     if state.email == 'htk@htk.com' and state.password == 'test1234':
-        navigate(state, 'dashboard')
+        navigate(state, '/client/dashboard')
 
 def on_upload(state):
     print(state.docker_image)
