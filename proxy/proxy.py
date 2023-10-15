@@ -114,7 +114,7 @@ RAM: $<|{ram_price}|text|format=%.5f|>/hr
 """)
 
 order_complete_md = Markdown("""
-# Your order has been placed
+# Your order has been completed
 
 ## Order details:
 
@@ -122,7 +122,11 @@ order_complete_md = Markdown("""
 * Threads: <|{num_threads}|> thread(s)
 * RAM: <|{ram}|>
 * Price: $<|{total_price}|text|format=%.5f|>/hr
+
+## You can visit your remotely hosted website [here]().
 """)
+
+# TODO Add hard link to proxy server
 
 
 pages = {
