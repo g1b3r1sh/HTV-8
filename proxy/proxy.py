@@ -33,20 +33,51 @@ sign_in_md = Markdown("""
 
 """)
 
-docker_image = None
+
+def generate_ram_size_strings():
+    ram_sizes = []
+    for i in range(128, 1000, 128):
+        ram_sizes.append(f"{i} MB")
+    for i in range(1, 17):
+        ram_sizes.append(f"{i} GB")
+    return ram_sizes
+ram_sizes = generate_ram_size_strings()
+
 max_ping = 100
+num_threads = 1
+ram = "128 MB"
+docker_image = None
 
 dashboard_md = Markdown("""
-# Dashboard
+# Order Server
 
 <|{max_ping}|number|label=Max Ping (ms)|>
 
 
-<|{threads}|slider|min=1|max=128|value=1000|>
+Threads:
+
+<|{num_threads}|slider|min=1|max=128|>
+
+RAM:
+
+<|{ram}|slider|lov={ram_sizes}|text_anchor=none|>
 
 
-<|{docker_image}|file_selector|label=Upload Docker Image|extensions=*|on_action=on_upload|>
+<|{docker_image}|file_selector|label=Upload Docker Image|extensions=.tar|on_action=on_upload|>
 
+
+<|Order|button|on_action=on_order_server|>
+
+""")
+
+order_complete_md = Markdown("""
+# Your order has been placed
+
+## Order details:
+
+* Max Ping: <|{max_ping}|> ms
+* Threads: <|{num_threads}|> thread(s)
+* RAM: <|{ram}|>
 """)
 
 
@@ -55,6 +86,7 @@ pages = {
     'home': home_md,
     'client/sign-in': sign_in_md,
     'client/dashboard': dashboard_md,
+    'client/complete': order_complete_md,
 }
 
 def navigate_signin(state):
@@ -69,6 +101,9 @@ def on_upload(state):
     filename = state.docker_image
     # In a non demo this new docker image would be pushed to the distributed servers, however we will just be using an existing dockerfile
     # on our demo distributed servers as implementation is trivial and time consuming
+
+def on_order_server(state):
+    navigate(state, 'client/complete')
 
 def get_lan_ip() -> str:
     iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
