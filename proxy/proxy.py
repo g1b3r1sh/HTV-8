@@ -71,12 +71,23 @@ RAM:
 
 """)
 
+order_complete_md = Markdown("""
+# Your order has been placed
+
+## Order details:
+
+* Max Ping: <|{max_ping}|> ms
+* Threads: <|{num_threads}|> thread(s)
+* RAM: <|{ram}|>
+""")
+
 
 pages = {
     '/': root_md,
     'home': home_md,
     'client/sign-in': sign_in_md,
     'client/dashboard': dashboard_md,
+    'client/complete': order_complete_md,
 }
 
 def navigate_signin(state):
@@ -93,9 +104,7 @@ def on_upload(state):
     # on our demo distributed servers as implementation is trivial and time consuming
 
 def on_order_server(state):
-    print(state.max_ping)
-    print(state.num_threads)
-    print(state.ram)
+    navigate(state, 'client/complete')
 
 def get_lan_ip() -> str:
     iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
