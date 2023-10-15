@@ -1,11 +1,12 @@
-from taipy import Gui, Rest
+from taipy import Gui
 from taipy.gui import Markdown
 from taipy.gui import navigate
 import requests
 import netifaces
-from flask import Flask, request
-import threading
 
+
+
+gui = Gui
 
 email = ''
 password = ''
@@ -17,8 +18,6 @@ sign_in_md = Markdown("""
 <|{password}|input|label=Password|password=True|>
 
 <|Log In|button|on_action=log_in|>
-
-Become a part of DeCloud
 
 """)
 
@@ -40,14 +39,19 @@ dashboard_md = Markdown("""
 
 
 pages = {
+    '/': root_md,
+    'home': home_md,
     'client/sign-in': sign_in_md,
     'client/dashboard': dashboard_md,
 }
 
+def navigate_signin(state):
+    navigate(state, 'client/sign-in')
+
 def log_in(state):
     print('login')
     if state.email == 'htk@htk.com' and state.password == 'test1234':
-        navigate(state, '/client/dashboard')
+        navigate(state, 'client/dashboard')
 
 def on_upload(state):
     print(state.docker_image)
