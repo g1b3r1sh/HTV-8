@@ -17,6 +17,20 @@ API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 current_docker_container_id = None
 
 
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+
 def launch_docker_container(image_filename):
     with open(f"dockers/{image_filename}", 'rb') as file:
         client = docker.from_env()
@@ -54,12 +68,11 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
-        hostname = socket.getfqdn()
-        ip_address = socket.gethostbyname(hostname)
-
         mac_address = uuid.getnode()
         mac_address_hex = ':'.join(
             ['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0, 8 * 6, 8)][::-1])
+
+        ip_address = get_ip()
 
         print(ip_address)
         print(mac_address_hex)
@@ -69,7 +82,7 @@ class StartServicePage(BoxLayout):
                 'ip': ip_address}
 
         send_ip_request = requests.post(url=API_ENDPOINT + 'api/server_init', json=data, headers={
-            'Content-Type':'application/json'})
+            'Content-Type': 'application/json'})
 
         # response = send_ip_request.text
 
