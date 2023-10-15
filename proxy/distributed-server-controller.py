@@ -11,6 +11,7 @@ server_app = Flask(__name__)
 def receive_data():
     data = request.get_json()
     servers.append(data['ip'])
+    ping_server(data)
     return 'Success!', 200
 
 @server_app.route('/DeServer')
