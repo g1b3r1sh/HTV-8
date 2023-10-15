@@ -1,9 +1,10 @@
-from taipy import Gui
+from taipy import Gui, Rest
 from taipy.gui import Markdown
 from taipy.gui import navigate
 import requests
 import netifaces
-
+from flask import Flask, request
+import threading
 
 
 gui = Gui
@@ -62,5 +63,24 @@ def get_lan_ip() -> str:
     iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
     return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
+def run_gui():
+    gui(pages=pages).run(port=8080, host=get_lan_ip())
 
-gui(pages=pages).run(port=8080, host=get_lan_ip())
+
+
+server_app = Flask(__name__)
+
+@server_app.route('/api/server_init', methods=['POST'])
+def receive_data():
+    data = request.get_json()
+    print(data['ip'])
+    return 'Success!', 200
+
+def run_flask():
+    server_app.run(debug=True, port=8000)
+
+gui_thread = threading.Thread(target=run_gui)
+#flask_thread = threading.Thread(target=run_flask)
+
+gui_thread.start()
+run_flask()
