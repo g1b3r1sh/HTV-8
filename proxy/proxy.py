@@ -8,6 +8,19 @@ import netifaces
 
 gui = Gui
 
+root_md = Markdown("""
+# Decloud
+""")
+
+home_md = Markdown("""
+#### Around the world, over **1 billion computers** stay unused for more than **10 hours** per day. That is **10 billion hours** of unused computing power.
+
+### Decloud aims to connect those in need of computer time to those with extra computer time. By selling server time that would otherwise go unused at a discounted rate, its a win-win situation for all.
+
+<|Sign In|button|on_action=navigate_signin|>
+
+""")
+
 email = ''
 password = ''
 sign_in_md = Markdown("""
