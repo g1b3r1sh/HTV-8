@@ -182,7 +182,7 @@
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
             Image:
-                source: 'red_round_button.png'  # Replace with the actual path to your image
+                source: 'red_round_button.png'
                 size_hint: 1, 1
 
             Button:
@@ -192,4 +192,12 @@
                 background_normal: ''
                 background_color: 0, 0, 0, 0
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                on_release: root.stop_service()  # Replace with your logic to start the service
+                on_release: root.stop_service()
+
+        Label:
+            id: dynamic_label
+            text: '$0.00'
+            font_size: 24
+            size_hint: (None, None)
+            size: self.texture_size  # Automatically adjust the label size based on the text
+            pos_hint: {'right': 1, 'y': 0}

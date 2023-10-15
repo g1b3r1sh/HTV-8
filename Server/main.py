@@ -9,12 +9,26 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.boxlayout import BoxLayout
 
-API_ENDPOINT = "http://pastebin.com/api/api_post.php"  # todo: change this
+API_ENDPOINT = "http://192.168.15.195:8000/"
 
 # your API key here
 API_KEY = "XXXXXXXXXXXXXXXXX"  # todo: change this
 
 current_docker_container_id = None
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 
 def launch_docker_container(image_filename):
@@ -54,46 +68,45 @@ class StartServicePage(BoxLayout):
         app.root.current = 'login'
 
     def start_service(self):
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-
         mac_address = uuid.getnode()
         mac_address_hex = ':'.join(
             ['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0, 8 * 6, 8)][::-1])
 
+        ip_address = get_ip()
+
         print(ip_address)
         print(mac_address_hex)
 
-        # data = {'api_dev_key': API_KEY,
-        #         'api_my_mac': mac_address_hex,
-        #         'api_my_ip': ip_address,
-        #         'api_paste_format': 'python'}
-        #
-        # send_ip_request = requests.post(url=API_ENDPOINT, data=data)
-        #
-        # response = send_ip_request.json()
-        #
-        # if not (send_ip_request.status_code == 200 and (response is not None or response != '')):
-        #     return
-        #
+        data = {'dev_key': API_KEY,
+                'my_mac': mac_address_hex,
+                'ip': ip_address}
+
+        send_ip_request = requests.post(url=API_ENDPOINT + 'api/server_init', json=data, headers={
+            'Content-Type': 'application/json'})
+
+        # response = send_ip_request.text
+
+        if not (send_ip_request.status_code == 200):
+            return
+
         # app.device_num = response['device_num']
         # docker_url = response['docker_url']
-        #
+
         # get_docker_request = requests.get(docker_url, allow_redirects=True)
-        #
+
         # if docker_url.find('/'):
         #     filename = docker_url.rsplit('/', 1)[1]
         # else:
         #     filename = "docker_file.tar"
-        #
+
         # file = open(f"dockers/{filename}", 'wb')
         # file.write(get_docker_request.content)
         # file.close()
 
-        filename = "docker_file.tar"
-
-        docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
-        docker_running_thread.start()
+        # filename = "docker_file.tar"
+        #
+        # docker_running_thread = threading.Thread(target=launch_docker_container, args=(filename, ))
+        # docker_running_thread.start()
 
         # change page
         app.root.transition = FadeTransition()
@@ -108,6 +121,10 @@ class StopServicePage(BoxLayout):
             # Switch to the registration screen
             app.root.transition = FadeTransition()
             app.root.current = 'start_service'
+
+    def update_label(self, dt):
+        self.amount += 0.01
+        self.ids.dynamic_label.text = f'${self.amount:.2f}'
 
     def kill_docker_container(self, container_id):
         # Stop docker process and cleanup docker files
@@ -138,10 +155,11 @@ class ServerApp(App):
         stop_service_screen.add_widget(StopServicePage())
 
         # Adding pages to the screen manager
+        sm.add_widget(start_service_screen)
         sm.add_widget(registration_screen)
         sm.add_widget(login_screen)
         sm.add_widget(stop_service_screen)
-        sm.add_widget(start_service_screen)
+        # sm.add_widget(start_service_screen)
         return sm
 
 
