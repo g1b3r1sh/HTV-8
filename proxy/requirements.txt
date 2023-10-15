@@ -95,6 +95,7 @@ partd==1.4.1
 passlib==1.7.4
 pexpect==4.8.0
 Pillow==9.0.1
+ping3==4.0.4
 protobuf==3.12.4
 psutil==5.9.0
 ptyprocess==0.7.0
@@ -141,6 +142,7 @@ six==1.16.0
 sortedcontainers==2.4.0
 soupsieve==2.3.1
 SQLAlchemy==2.0.22
+ssh-import-id==5.11
 systemd-python==234
 taipy==2.4.0
 taipy-config==2.4.0
