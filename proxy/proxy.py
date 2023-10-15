@@ -8,6 +8,19 @@ import netifaces
 
 gui = Gui
 
+root_md = Markdown("""
+# Decloud
+""")
+
+home_md = Markdown("""
+#### Around the world, over **1 billion computers** stay unused for more than **10 hours** per day. That is **10 billion hours** of unused computing power.
+
+### Decloud aims to connect those in need of computer time to those with extra computer time. By selling server time that would otherwise go unused at a discounted rate, its a win-win situation for all.
+
+<|Sign In|button|on_action=navigate_signin|>
+
+""")
+
 email = ''
 password = ''
 sign_in_md = Markdown("""
@@ -18,9 +31,6 @@ sign_in_md = Markdown("""
 <|{password}|input|label=Password|password=True|on_action=log_in|>
 
 <|Log In|button|on_action=log_in|>
-
-Go to [Second Page](/home) for more information.
-Become a part of DeCloud
 
 """)
 
@@ -43,13 +53,18 @@ dashboard_md = Markdown("""
 
 
 pages = {
+    '/': root_md,
+    'home': home_md,
     'client/sign-in': sign_in_md,
     'client/dashboard': dashboard_md,
 }
 
+def navigate_signin(state):
+    navigate(state, 'client/sign-in')
+
 def log_in(state):
     if state.email == 'htk@htk.com' and state.password == 'test1234':
-        navigate(state, '/client/dashboard')
+        navigate(state, 'client/dashboard')
 
 def on_upload(state):
     print(state.docker_image)
