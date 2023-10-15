@@ -8,7 +8,7 @@ import netifaces
 gui = Gui
 
 root_md = Markdown("""
-# Decloud
+<|decloud-logo.png|image|>
 """)
 
 home_md = Markdown("""
