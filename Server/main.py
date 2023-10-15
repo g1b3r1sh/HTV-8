@@ -115,8 +115,9 @@ class StartServicePage(BoxLayout):
 
 class StopServicePage(BoxLayout):
     def stop_service(self):
-        status = self.kill_docker_container(current_docker_container_id)
+        # status = self.kill_docker_container(current_docker_container_id)
 
+        status = True
         if status:
             # Switch to the registration screen
             app.root.transition = FadeTransition()
