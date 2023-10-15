@@ -1,6 +1,10 @@
 from taipy import Gui
 from taipy.gui import Markdown
 from taipy.gui import navigate
+import requests
+import netifaces
+
+
 
 gui = Gui
 
@@ -16,36 +20,47 @@ sign_in_md = Markdown("""
 <|Log In|button|on_action=log_in|>
 
 Go to [Second Page](/home) for more information.
+Become a part of DeCloud
 
 """)
 
-bandwidth = 10
-docker_image: any
+docker_image = None
+max_ping = 100
+filename = ''
 
 dashboard_md = Markdown("""
 # Dashboard
 
-<|{value}|number|label=Max Ping (ms)|>
-
-<|{upload}|slider|min=10|max=1000000|value=1000|>
+<|{max_ping}|number|label=Max Ping (ms)|>
 
 
-<|{docker_image}|file_selector|label=Upload Docker Image|extensions=*|>
+<|{threads}|slider|min=1|max=128|value=1000|>
 
-<|{value}|toggle|lov=Active; Inactive|>
+
+<|{docker_image}|file_selector|label=Upload Docker Image|extensions=*|on_action=on_upload|>
 
 """)
 
 
 pages = {
-    'sign-in': sign_in_md,
-    'dashboard': dashboard_md,
+    'client/sign-in': sign_in_md,
+    'client/dashboard': dashboard_md,
 }
 
 def log_in(state):
     if state.email == 'htk@htk.com' and state.password == 'test1234':
         navigate(state, 'dashboard')
-        
+
+def on_upload(state):
+    print(state.docker_image)
+    filename = state.docker_image
+    dir(state)
+    with open(state.docker_image, 'rb') as f:
+        r = requests.post(url, data={'pxeconfig': f.read()})
+
+def get_lan_ip() -> str:
+    iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
+    return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
 
-gui(pages=pages).run()
+gui(pages=pages).run(port=8080, host=get_lan_ip())
