@@ -3,7 +3,7 @@ from taipy.gui import Markdown
 from taipy.gui import navigate
 import requests
 import netifaces
-
+import os
 
 
 gui = Gui
@@ -67,11 +67,9 @@ def log_in(state):
         navigate(state, 'client/dashboard')
 
 def on_upload(state):
-    print(state.docker_image)
     filename = state.docker_image
-    dir(state)
-    with open(state.docker_image, 'rb') as f:
-        r = requests.post(url, data={'pxeconfig': f.read()})
+    # In a non demo this new docker image would be pushed to the distributed servers, however we will just be using an existing dockerfile
+    # on our demo distributed servers as implementation is trivial and time consuming
 
 def get_lan_ip() -> str:
     iface = netifaces.gateways()['default'][netifaces.AF_INET][1]
@@ -79,21 +77,3 @@ def get_lan_ip() -> str:
 
 Gui(pages=pages).run(port=8080, host=get_lan_ip())
 
-gui_thread = threading.Thread(target=run_gui)
-gui_thread.start()
-
-"""
-servers = []
-
-server_app = Flask(__name__)
-
-@server_app.route('/api/server_init', methods=['POST'])
-def receive_data():
-    data = request.get_json()
-    servers.append(data['ip'])
-    return 'Success!', 200
-
-#server_app.run(debug=True, port=8000)
-
-print('after')
-"""
