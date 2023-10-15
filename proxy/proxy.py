@@ -12,9 +12,9 @@ root_md = Markdown("""
 """)
 
 home_md = Markdown("""
-#### Around the world, over **1 billion computers** stay unused for more than **10 hours** per day. That is **10 billion hours** of unused computing power.
+### According to [Worldometers](https://www.worldometers.info/computers/), this year alone, over **150 million** computers have been sold worldwide, many of which will stay unused for at least **4 hours** per day. This means more than **500 million hours** of computing power remains unused daily.
 
-### Decloud aims to connect those in need of computer time to those with extra computer time. By selling server time that would otherwise go unused at a discounted rate, its a win-win situation for all.
+#### Decloud aims to connect those in need of computer time to those with extra computer time. By selling server time that would otherwise go unused at a discounted rate, its a win-win situation for all.
 
 <|Sign In|button|on_action=navigate_signin|>
 
